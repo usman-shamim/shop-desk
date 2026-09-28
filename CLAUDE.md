@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.10+ (SDK requirement); developed and demonstrated on 3.11+ + `openai-agents` (the only agent framework — agents, tools, (001-shop-desk)
+- `catalogue.json` read at run time (single source of price/stock truth); (001-shop-desk)
+
+## Recent Changes
+- 001-shop-desk: Added Python 3.10+ (SDK requirement); developed and demonstrated on 3.11+ + `openai-agents` (the only agent framework — agents, tools,
