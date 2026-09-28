@@ -83,6 +83,7 @@ shopdesk/
 ├── context.py        # ShopContext dataclass; tier; basket held per session
 ├── catalogue.py      # catalogue.json load + read-time lookups (NFR-3)
 ├── orders.py         # LineItem, Order, recompute_total, mismatch report
+├── messages.py       # canonical customer-visible sentences (guardrail refusal, out-of-stock, ceiling, escalation)
 ├── instructions.py   # FR-4 dynamic instruction builder (context + clock)
 ├── tools.py          # lookup_price, lookup_stock, place_order, seasonal (off), loyalty (regular)
 ├── fastpath.py       # FR-3 tool_use_behavior: price answer as final output

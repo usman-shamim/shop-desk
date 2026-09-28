@@ -157,6 +157,8 @@ Single project: package modules in `shopdesk/`, entry points at the repository r
 - [ ] T048 [P] Validate `quickstart.md` end to end on a clean checkout: install, configure, run both entry points (SC-007)
 - [ ] T049 Confirm `git log` shows the specification artifacts before the first source commit (NFR-5, SC-008)
 - [ ] T050 [P] Update `CLAUDE.md` runtime guidance with the demo flags and the three configuration levels (NFR-2)
+- [ ] T051 [P] Add the FR-9 clone-identity test: assert shared attributes match by `is`, owned attributes do not, and neither clone declares a model, in `tests/test_clones.py` (FR-9, NFR-2)
+- [ ] T052 [P] Add `shopdesk/messages.py` with the canonical sentences from `contracts/handoff-and-guardrail.md` and use them on the guardrail, out-of-stock, ceiling and escalation paths (FR-6, FR-8, FR-10)
 
 ---
 

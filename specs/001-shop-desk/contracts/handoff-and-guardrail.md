@@ -49,10 +49,25 @@ async def catalogue_truth_guardrail(
   match case-insensitive). This is a comparison against the file, not a judgement.
 - **Pass**: `GuardrailFunctionOutput(output_info=None, tripwire_triggered=False)`.
 - **Fail**: `tripwire_triggered=True` with `output_info={"reason": ..., "offending": ...}`.
-- **Handling**: the runner catches the guardrail tripwire exception and replies with a polite
-  sentence — never a traceback (FR-6).
+- **Handling**: the runner catches the guardrail tripwire exception and replies with the
+  canonical refusal sentence — never a traceback (FR-6).
 - **Demonstrable behaviour**: editing a price in `catalogue.json` makes a previously passing
   answer trip. Removing an item mid-conversation makes an answer referencing it trip as
   "no longer available".
 - **Out of scope**: stock reservation language, bargaining, and prompt-injection defence are
   not part of this guardrail (the first two are deliberate non-goals).
+
+## Canonical customer-visible sentences
+
+These strings live in `shopdesk/messages.py` and are the **only** wording used for these
+situations; tests and demo checks assert against them, so "polite" is a fixed string rather
+than an implementation choice.
+
+| Situation | Exact sentence |
+|-----------|----------------|
+| Guardrail refusal (price or SKU not in the catalogue) | `I can't confirm that price from our catalogue, so I won't quote it — a colleague can check it for you.` |
+| Out of stock | `That item is out of stock right now, so I can't sell it — I won't hold it without checking.` |
+| Item removed from the catalogue mid-conversation | `That item isn't in our catalogue any more, so I can't price it.` |
+| Turn ceiling reached (10 turns) | `I'm sorry — I've taken this as far as I can. I'm passing you to a colleague who can finish it with you.` |
+| Escalation acknowledgement | `I'm handing you to a colleague now, and they have what they need.` |
+| Quantity beyond stock | `We only have {stock} of {name} — I can put {stock} in this conversation if that helps.` |

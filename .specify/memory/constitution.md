@@ -1,10 +1,14 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 (template) → 1.0.0 (ratified, initial adoption)
+Version change: 1.0.0 (template) → 1.0.0 (ratified, initial adoption) → 1.0.1 (clarification)
 Modified principles: none (all template placeholders replaced with initial principles)
 Added sections: Core Principles (I–VII), Additional Constraints, Development Workflow & Quality Gates, Governance
 Removed sections: none
+Amendment 1.0.1 (2026-09-28): Principle II clarified — an agent either declares its own model
+or is documented as deliberately inheriting the process default, and a clone MUST NOT restate
+an inherited setting. Resolves the NFR-2 / FR-9 reading conflict found by /sp.analyze.
+Bump type PATCH: clarification of existing intent; no principle removed or redefined.
 Templates requiring updates:
   ✅ .specify/templates/plan-template.md — "Constitution Check" gate is generic; no edit required
   ✅ .specify/templates/spec-template.md — mandatory sections (user scenarios, requirements, success criteria) align
@@ -39,8 +43,11 @@ permitted, both to **`gpt-5-mini`**, and each MUST be justified in `plan.md`:
 2. **Run level** — the single re-quote run (`RunConfig(model="gpt-5-mini")`), which is
    scoped to one run and MUST NOT change any other run's model.
 
-Every agent MUST declare its own model settings (NFR-2). Removing the global default MUST
-change exactly one behaviour: the model that answers a plain question.
+Every agent's model configuration MUST be explicit and justified: an agent either declares its
+own model or is documented in `plan.md` as deliberately inheriting the process default, and a
+clone MUST NOT restate a setting it inherits (NFR-2, FR-9). Settings that are not inherited,
+such as reasoning effort, MUST be declared per agent. Removing the global default MUST change
+exactly one behaviour: the model that answers a plain question.
 
 **Rationale**: a price question must never cost a reasoning model; the budget is spent
 deliberately, not by accident.
@@ -135,4 +142,4 @@ Done. Any complexity that conflicts with a principle MUST be recorded in `plan.m
 Complexity Tracking with the simpler alternative that was rejected and why. Runtime
 development guidance lives in `CLAUDE.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-28 | **Last Amended**: 2026-09-28
+**Version**: 1.0.1 | **Ratified**: 2026-09-28 | **Last Amended**: 2026-09-28

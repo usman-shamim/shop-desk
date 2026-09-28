@@ -134,7 +134,7 @@ and read the cost line and the trace.
 ### Non-Functional Requirements
 
 - **NFR-1**: Secrets MUST live in a gitignored environment file and MUST never be printed. A missing key MUST fail at startup with a single readable sentence, not a stack trace.
-- **NFR-2**: Every agent MUST declare its own model settings. The cheap model is the process default and every override MUST be justified in the plan.
+- **NFR-2**: Every agent's model configuration MUST be explicit and justified: an agent either declares its own model or is documented in the plan as deliberately inheriting the process default, and a clone MUST NOT restate a setting it inherits. Settings that are not inherited (such as reasoning effort) MUST be declared per agent. The cheap model is the process default and every override MUST be justified in the plan.
 - **NFR-3**: No price, stock figure or SKU may reach a customer unless it came from the catalogue during that run.
 - **NFR-4**: A tool meeting bad data MUST return a sentence the model can use. A tool that raises is a defect. A catalogue file that is missing or malformed at startup MUST fail with a single readable sentence naming the file.
 - **NFR-5**: Version history MUST show the four specification artifacts committed before the first source file.
@@ -163,7 +163,7 @@ and read the cost line and the trace.
 - **SC-003**: A planted mismatch between a stated total and the recomputed total is caught and reported 100% of the time.
 - **SC-004**: The same question asked by a walk-in and by a regular customer yields two different tool sets; the seasonal tool appears in neither.
 - **SC-005**: A conversation of at least eleven turns still identifies the order under discussion, and two browser sessions never share a basket.
-- **SC-006**: Every escalation arrives at the human with a structured reason and a history demonstrably shorter than the full transcript.
+- **SC-006**: Every escalation arrives at the human with a structured reason and a transferred history containing **zero tool-call items** — its item count is lower than the full transcript by exactly the number of tool items removed.
 - **SC-007**: Every conversation produces a cost line whose figures come from the run, and one openable trace showing the fast-path and reasoning turns.
 - **SC-008**: Version history shows the four specification artifacts ahead of the first source file.
 
