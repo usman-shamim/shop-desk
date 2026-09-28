@@ -1,0 +1,7 @@
+.env
+.commandcode/
+.claude/settings.local.json
+__pycache__/
+.venv/
+*.pyc
+costs.jsonl
