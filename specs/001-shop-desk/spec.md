@@ -5,6 +5,14 @@
 **Status**: Draft
 **Input**: User description: "Shop Desk: a customer-service desk for a small shop that answers stock and price questions from a catalogue, builds a typed order when the customer confirms, and hands genuinely stuck conversations to a human."
 
+## Clarifications
+
+### Session 2026-09-28
+
+- Q: FR-8 requires a turn ceiling — which ceiling should the Desk run under? → A: 10 turns per conversation.
+- Q: FR-12 requires a history-trimming rule — what should it drop first? → A: Keep the first user message and the most recent 6 exchanges; discard tool-call items first.
+- Q: Which agent should carry the agent-level cheap-override? → A: A dedicated order agent, invoked when the customer confirms, so the Desk itself stays on the process default.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ask what something costs (Priority: P1)
@@ -109,18 +117,18 @@ and read the cost line and the trace.
 
 ### Functional Requirements
 
-- **FR-1**: Products MUST live in a single catalogue file and MUST be reachable only through tools. Model configuration MUST exist at exactly three levels: a process-wide cheap default, an agent-level override used by the agent that must reason about an order, and a single-run override used by one re-quote path. Removing the process-wide default MUST change exactly one behaviour: the model that answers a plain question.
+- **FR-1**: Products MUST live in a single catalogue file and MUST be reachable only through tools. Model configuration MUST exist at exactly three levels: a process-wide cheap default, an agent-level override used by a dedicated order agent (the Desk itself stays on the process default), and a single-run override used by one re-quote path. Removing the process-wide default MUST change exactly one behaviour: the model that answers a plain question.
 - **FR-2**: Every run MUST receive a shop context object (shop, currency, customer identifier, tier) that tools read and that MUST NEVER appear in prompt text. A tool's generated interface MUST expose no context parameter.
 - **FR-3**: A question answerable from the catalogue alone MUST be answered by the lookup tool's own output, with the model neither seeing the result nor writing a sentence around it. Ordinary questions MUST keep the normal multi-step reasoning loop. The number of model calls per path MUST be stateable.
 - **FR-4**: The system instructions MUST be built per turn from context and the clock. Outside shop hours the Desk MUST NOT promise same-day service and MUST state when it opens. The resolved instruction text MUST be printable before any model call.
-- **FR-5**: When the customer confirms, the Desk's output MUST be a structured order (identifier, status, line items with SKU/quantity/unit price, total) rather than prose. The total MUST be recomputed in code from the line items, and a mismatch between the stated and recomputed total MUST be reported.
-- **FR-6**: An output guardrail MUST read the finished answer and refuse it if it quotes a price or a SKU that is not in the catalogue. This MUST be a comparison against the catalogue data, not a judgement. The refusal MUST be turned into a polite message rather than an error. An out-of-stock item MUST never be sold.
+- **FR-5**: When the customer confirms, the Desk's output MUST be a structured order (identifier, status, line items with SKU/quantity/unit price, total) rather than prose. The total MUST be recomputed in code from the line items, and a mismatch between the stated and recomputed total MUST be reported. A quantity greater than the available stock MUST be refused, with the available quantity stated.
+- **FR-6**: An output guardrail MUST read the finished answer and refuse it if it quotes a price or a SKU that is not in the catalogue. This MUST be a comparison against the catalogue data, not a judgement. The refusal MUST be turned into a polite message rather than an error. An out-of-stock item MUST never be sold. An item removed from the catalogue mid-conversation MUST be reported as no longer available, and stock figures MUST be presented as read at the time of the answer, never as a reservation the Desk cannot make.
 - **FR-7**: Two distinct tool controls MUST be present: one seasonal tool switched off statically so it appears in no tool interface at all, and one tool offered only to customers whose tier is regular. The same question asked by a walk-in and by a regular customer MUST present different tool sets.
-- **FR-8**: A pricing specialist MUST be exposed to the Desk as a tool and MUST answer with a figure rather than a paragraph; the Desk MUST deliver that figure in its own wording. Every conversation MUST run under a turn ceiling that raises on breach, is caught, and ends the conversation politely. The chosen ceiling MUST be stateable.
+- **FR-8**: A pricing specialist MUST be exposed to the Desk as a tool and MUST answer with a figure rather than a paragraph; the Desk MUST deliver that figure in its own wording. Every conversation MUST run under a turn ceiling of 10 turns that raises on breach, is caught, and ends the conversation politely.
 - **FR-9**: The pricing and escalation agents MUST be clones of one base agent, differing only in instructions and model settings. A clone MUST NOT restate a setting it inherits. What clones share and what they own MUST be demonstrable with identity comparisons.
-- **FR-10**: Escalation MUST hand the conversation to a human escalation agent with the reason as a structured typed value, and with history filtered so the specialist does not inherit every tool call. What was removed and what the specialist still needs MUST be documented in the specification.
+- **FR-10**: Escalation MUST hand the conversation to a human escalation agent with the reason as a structured typed value drawn from a closed set — the item is not in the catalogue, the item is out of stock, the conversation reached its turn ceiling, the customer asked for a human, or the customer is unhappy — and with history filtered so the specialist does not inherit every tool call. What was removed and what the specialist still needs MUST be documented in the specification.
 - **FR-11**: Per-conversation hooks MUST add a cost line reporting turns, tokens, and which model served each turn, distinguishing fast-path turns from reasoning turns. Agent-level hooks MUST be attached to the pricing specialist only. A custom runner MUST record each run's model and token count. All figures MUST come from the run context, not estimates.
-- **FR-12**: A browser interface MUST hold a conversation of at least ten turns with history carried per session and trimmed past a chosen, justified turn count. Trimming MUST NOT break recall of the order under discussion, and two sessions MUST NOT share a basket.
+- **FR-12**: A browser interface MUST hold a conversation of at least ten turns with history carried per session and trimmed past 6 exchanges — keeping the first user message and the most recent 6 exchanges, and discarding tool-call items before anything else. Trimming MUST NOT break recall of the order under discussion, and two sessions MUST NOT share a basket.
 - **FR-13**: Tracing MUST be enabled under the shop's own credentials, and one whole customer conversation MUST be one trace in which the fast-path turns, the reasoning turns, and the most expensive turn can be identified.
 
 ### Non-Functional Requirements
@@ -128,7 +136,7 @@ and read the cost line and the trace.
 - **NFR-1**: Secrets MUST live in a gitignored environment file and MUST never be printed. A missing key MUST fail at startup with a single readable sentence, not a stack trace.
 - **NFR-2**: Every agent MUST declare its own model settings. The cheap model is the process default and every override MUST be justified in the plan.
 - **NFR-3**: No price, stock figure or SKU may reach a customer unless it came from the catalogue during that run.
-- **NFR-4**: A tool meeting bad data MUST return a sentence the model can use. A tool that raises is a defect.
+- **NFR-4**: A tool meeting bad data MUST return a sentence the model can use. A tool that raises is a defect. A catalogue file that is missing or malformed at startup MUST fail with a single readable sentence naming the file.
 - **NFR-5**: Version history MUST show the four specification artifacts committed before the first source file.
 
 ### Out of Scope (Deliberate Non-Goals)
