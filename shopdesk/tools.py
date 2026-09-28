@@ -147,10 +147,11 @@ def loyalty_quote_impl(context: RunContextWrapper[ShopContext]) -> str:
                 "and I'll price it for you."
             )
         total = shop_context.basket_total()
-        loyalty_total = round(total * (1 - LOYALTY_DISCOUNT_RATE), 2)
+        percent = round(LOYALTY_DISCOUNT_RATE * 100)
         return (
-            f"As a regular customer, your basket of {total:g} {shop_context.currency} comes "
-            f"to {loyalty_total:g} {shop_context.currency} at the loyalty price."
+            f"As a regular customer, your basket of {total:g} {shop_context.currency} carries a "
+            f"{percent}% loyalty discount that we apply at the counter. I won't quote the "
+            "discounted figure because it isn't a catalogue price."
         )
     except Exception:
         return messages.TOOL_FAILURE

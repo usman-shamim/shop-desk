@@ -69,3 +69,20 @@ def test_guardrail_ignores_the_customer_identifier_and_units() -> None:
         "The hand blender is 2600 PKR and the iron is 1200W.", CATALOGUE
     )
     assert ok, offending
+
+
+def test_loyalty_answer_survives_the_guardrail_and_quotes_no_derived_price() -> None:
+    """FR-6 x FR-7: a loyalty answer must not quote a figure the catalogue never had."""
+    from types import SimpleNamespace
+
+    from shopdesk.tools import loyalty_quote_impl, set_catalogue
+
+    set_catalogue(CATALOGUE)
+    context = ShopContext(shop="Al-Noor Electronics", currency="PKR", customer_id="cust-7")
+    context.add_line(LineItem(sku="KTL-01", qty=3, unit_price=4200.0))
+    answer = loyalty_quote_impl(SimpleNamespace(context=context))
+
+    discounted = round(context.basket_total() * 0.9, 2)
+    assert f"{discounted:g}" not in answer
+    ok, offending = check_answer(answer, CATALOGUE, extra_allowed=[context.basket_total()])
+    assert ok, offending
