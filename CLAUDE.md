@@ -215,3 +215,24 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 
 ## Recent Changes
 - 001-shop-desk: Added Python 3.10+ (SDK requirement); developed and demonstrated on 3.11+ + `openai-agents` (the only agent framework — agents, tools,
+
+## Shop Desk Runtime Guidance
+
+Model configuration exists at exactly three levels (FR-1, constitution principle II). Do not add a
+fourth, and do not name a model anywhere else:
+
+1. **Process / global** — `OPENAI_DEFAULT_MODEL` in `.env` (dotenv, loaded in `shopdesk/config.py`).
+   Read by any agent that declares no model: the Desk, the pricing clone, the escalation clone.
+2. **Agent** — `order_agent` in `shopdesk/agents.py` declares `model="gpt-5-mini"`; it is the only
+   agent that does, and the clones must never restate an inherited setting.
+3. **Run** — `shopdesk/pricing.re_quote_impl` passes `RunConfig(model="gpt-5-mini")` for one run.
+
+Commands:
+
+- `python main.py` — interactive Desk; `--tier regular`, `--hour 21`, `--print-prompt`, `--message "..."`, `--session ID`
+- `chainlit run chainlit_app.py` — browser session (FR-12); `/cost` and `/history` inside the chat
+- `pytest -q` — offline test suite (no API key required)
+- `python scripts/demo_checks.py <check>` — evidence: `price-call-count`, `catalogue-edit`, `total-mismatch`, `tools-by-tier`, `grep-checks`, `escalation`, `trim`
+
+House rules: every tool returns a sentence instead of raising (NFR-4); no price, stock figure or SKU
+reaches a customer unless it came from `catalogue.json` in that run (NFR-3); secrets only in `.env`.

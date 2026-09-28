@@ -78,3 +78,24 @@
 - Items marked `[Gap]` identify requirements that must be written before `/sp.plan`, or explicitly
   deferred with a rationale recorded in the plan.
 - Items referencing resolved clarifications (CHK015) are satisfied by the Clarifications section.
+
+## Evidence (2026-09-28)
+
+Commands run in the repository root against the built Desk. `pytest -q` → **37 passed**.
+
+| Guide check | Command | Observed result |
+|---|---|---|
+| Spec preceded code | `git log --oneline` | `ec9c858` init → `1197de8` constitution → `1da7cb3` spec → `ee9f0e8` clarify/checklist → `6442603` plan/ADRs → `833cb23` tasks; first source commit comes after all six |
+| Three configuration levels present | `python -c "from shopdesk.agents import show_clone_identity; ..."` | `models: {desk: None, pricing: None, escalation: None, order: 'gpt-5-mini'}`; global via `OPENAI_DEFAULT_MODEL` in `.env`; run level in `pricing.re_quote_impl` |
+| Context never in the prompt | `python scripts/demo_checks.py grep-checks` | PASS — no prompt string carries `customer_id`; no tool schema exposes a context parameter |
+| Fast path costs one call | `python scripts/demo_checks.py price-call-count` | SKIP offline — needs a live `OPENAI_API_KEY`; the turn is tagged `fast_path` in the cost line |
+| Order total recomputed | `python scripts/demo_checks.py total-mismatch` | PASS — stated 1000 vs recomputed 12600 reported |
+| Prices come from the file | `python scripts/demo_checks.py catalogue-edit` | PASS — answer passes, then trips with offending `[4200.0]` after the catalogue price changes |
+| Tools differ by tier | `python scripts/demo_checks.py tools-by-tier` | PASS — walk-in 4 tools, regular 5; `seasonal_offer` in neither |
+| Escalation carries a typed reason | `python scripts/demo_checks.py escalation` | PASS — reason is a value from the closed set |
+| History trimmed on transfer | `python scripts/demo_checks.py escalation` / `trim` | PASS — 7 items → 4 transferred (3 tool items removed); 20 → 13 on the session trim |
+| Ten turns and still coherent | `chainlit run chainlit_app.py` | PENDING — needs a live `OPENAI_API_KEY`; per-session context and the trim rule are implemented and tested offline |
+
+**Not yet verified without a key**: SC-001's live call counts, SC-005's eleven-turn recall, and
+SC-007's trace contents. Each is implemented (`shopdesk/fastpath.py`, `shopdesk/runner.py`,
+`shopdesk/tracing.py`) and has an offline test where one is possible.

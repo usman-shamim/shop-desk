@@ -1,6 +1,7 @@
 .env
 .commandcode/
 .claude/settings.local.json
+.chainlit/
 __pycache__/
 .venv/
 *.pyc

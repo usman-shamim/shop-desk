@@ -1,0 +1,10 @@
+{
+  "shop": "Al-Noor Electronics",
+  "currency": "PKR",
+  "products": [
+    { "sku": "KTL-01", "name": "Electric kettle 1.7L", "price": 4200, "stock": 12 },
+    { "sku": "FAN-22", "name": "Pedestal fan", "price": 9800, "stock": 0 },
+    { "sku": "IRN-07", "name": "Steam iron 1200W", "price": 3350, "stock": 5 },
+    { "sku": "MIX-14", "name": "Hand blender", "price": 2600, "stock": 8 }
+  ]
+}
